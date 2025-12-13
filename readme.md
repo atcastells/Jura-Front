@@ -47,7 +47,9 @@ Jura transforms the traditional resume experience into an intelligent, conversat
 
 ### Prerequisites
 
-- Node.js 18+ and pnpm
+- Node.js 18+ (recommended: Node.js 20 LTS)
+- pnpm 9.0+
+- Backend API endpoint (configure via environment variables)
 
 ### Installation
 
@@ -69,6 +71,8 @@ pnpm lint
 ```
 
 ## Roadmap
+
+_Status: ✅ Complete | ⏳ In Progress / Planned_
 
 ### Phase 1: MVP UI (Q1 2025)
 - ✅ Core React + TypeScript + Vite setup
