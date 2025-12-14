@@ -1,1 +1,2 @@
-export { AuthProvider, AuthContext, useAuthContext } from './AuthContext';
+export { AuthProvider, AuthContext } from './AuthContext';
+export { useAuthContext } from './useAuthContext';

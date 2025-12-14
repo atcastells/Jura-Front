@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useCallback,
-  useMemo,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useMemo, type ReactNode } from "react";
 import {
   useCurrentUserQuery,
   useSignInMutation,
@@ -62,14 +56,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuthContext = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuthContext must be used within an AuthProvider");
-  }
-  return context;
 };
 
 export { AuthContext };

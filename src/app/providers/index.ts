@@ -1,1 +1,2 @@
-export { QueryProvider, queryClient } from './QueryProvider';
+export { QueryProvider } from './QueryProvider';
+export { queryClient } from './queryClient';
