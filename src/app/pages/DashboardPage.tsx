@@ -1,6 +1,7 @@
 import { useAuth, useCurrentUser } from "@/auth";
 import { ConversationView } from "@/chat";
 import { ProfilePreviewPanel } from "@/profile";
+import { ErrorBoundary } from "@/shared";
 
 export const DashboardPage = () => {
   const { signOut } = useAuth();
@@ -30,7 +31,9 @@ export const DashboardPage = () => {
       <main className="mx-auto flex flex-1 w-full max-w-[1800px] gap-6 overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
         {/* Left column - Conversation */}
         <div className="flex-1 min-w-0">
-          <ConversationView />
+          <ErrorBoundary>
+            <ConversationView />
+          </ErrorBoundary>
         </div>
 
         {/* Right column - Profile preview */}
