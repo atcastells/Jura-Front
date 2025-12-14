@@ -21,7 +21,9 @@ export const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
         </h2>
 
         {subtitle && (
-          <p className="mt-2 text-center text-sm text-neutral-600">{subtitle}</p>
+          <p className="mt-2 text-center text-sm text-neutral-600">
+            {subtitle}
+          </p>
         )}
       </div>
 

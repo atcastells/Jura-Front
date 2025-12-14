@@ -9,7 +9,9 @@ export const DashboardPage = () => {
       {/* Header */}
       <header className="bg-white shadow">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold text-neutral-900">Jura Dashboard</h1>
+          <h1 className="text-2xl font-bold text-neutral-900">
+            Jura Dashboard
+          </h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-neutral-600">{user.email}</span>
             <button
@@ -51,7 +53,9 @@ export const DashboardPage = () => {
               <div className="mx-auto h-12 w-12 rounded-full bg-primary-100 p-3">
                 <span className="text-xl">💬</span>
               </div>
-              <h3 className="mt-4 font-medium text-neutral-900">Chat with AI</h3>
+              <h3 className="mt-4 font-medium text-neutral-900">
+                Chat with AI
+              </h3>
               <p className="mt-1 text-sm text-neutral-500">
                 Refine your professional story
               </p>
@@ -61,7 +65,9 @@ export const DashboardPage = () => {
               <div className="mx-auto h-12 w-12 rounded-full bg-primary-100 p-3">
                 <span className="text-xl">🔗</span>
               </div>
-              <h3 className="mt-4 font-medium text-neutral-900">Share Profile</h3>
+              <h3 className="mt-4 font-medium text-neutral-900">
+                Share Profile
+              </h3>
               <p className="mt-1 text-sm text-neutral-500">
                 Generate shareable links for recruiters
               </p>

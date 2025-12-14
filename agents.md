@@ -398,109 +398,110 @@ Jura uses a **Teal/Cyan** primary palette — conveying trust, professionalism, 
 
 #### Primary Colors (Teal)
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `primary-50` | `#f0fdfa` | Subtle backgrounds |
-| `primary-100` | `#ccfbf1` | Hover states, highlights |
-| `primary-200` | `#99f6e4` | Light accents |
-| `primary-300` | `#5eead4` | Secondary actions |
-| `primary-400` | `#2dd4bf` | Icons, badges |
+| Token         | Hex       | Usage                      |
+| ------------- | --------- | -------------------------- |
+| `primary-50`  | `#f0fdfa` | Subtle backgrounds         |
+| `primary-100` | `#ccfbf1` | Hover states, highlights   |
+| `primary-200` | `#99f6e4` | Light accents              |
+| `primary-300` | `#5eead4` | Secondary actions          |
+| `primary-400` | `#2dd4bf` | Icons, badges              |
 | `primary-500` | `#14b8a6` | **Primary buttons, links** |
-| `primary-600` | `#0d9488` | **Primary hover states** |
-| `primary-700` | `#0f766e` | Active states |
-| `primary-800` | `#115e59` | Dark accents |
-| `primary-900` | `#134e4a` | Text on light bg |
-| `primary-950` | `#042f2e` | Darkest shade |
+| `primary-600` | `#0d9488` | **Primary hover states**   |
+| `primary-700` | `#0f766e` | Active states              |
+| `primary-800` | `#115e59` | Dark accents               |
+| `primary-900` | `#134e4a` | Text on light bg           |
+| `primary-950` | `#042f2e` | Darkest shade              |
 
 #### Neutral Colors (Slate)
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `neutral-50` | `#f8fafc` | Page backgrounds |
-| `neutral-100` | `#f1f5f9` | Card backgrounds |
-| `neutral-200` | `#e2e8f0` | Borders, dividers |
-| `neutral-300` | `#cbd5e1` | Disabled states |
-| `neutral-400` | `#94a3b8` | Placeholder text |
-| `neutral-500` | `#64748b` | Secondary text |
-| `neutral-600` | `#475569` | Body text |
-| `neutral-700` | `#334155` | Headings |
-| `neutral-800` | `#1e293b` | Primary text |
-| `neutral-900` | `#0f172a` | Darkest text |
+| Token         | Hex       | Usage                 |
+| ------------- | --------- | --------------------- |
+| `neutral-50`  | `#f8fafc` | Page backgrounds      |
+| `neutral-100` | `#f1f5f9` | Card backgrounds      |
+| `neutral-200` | `#e2e8f0` | Borders, dividers     |
+| `neutral-300` | `#cbd5e1` | Disabled states       |
+| `neutral-400` | `#94a3b8` | Placeholder text      |
+| `neutral-500` | `#64748b` | Secondary text        |
+| `neutral-600` | `#475569` | Body text             |
+| `neutral-700` | `#334155` | Headings              |
+| `neutral-800` | `#1e293b` | Primary text          |
+| `neutral-900` | `#0f172a` | Darkest text          |
 | `neutral-950` | `#020617` | Dark mode backgrounds |
 
 #### Semantic Colors
 
-| Token | Hex | Usage |
-|-------|-----|-------|
+| Token         | Hex       | Usage          |
+| ------------- | --------- | -------------- |
 | `success-500` | `#22c55e` | Success states |
-| `success-600` | `#16a34a` | Success hover |
+| `success-600` | `#16a34a` | Success hover  |
 | `warning-500` | `#f59e0b` | Warning states |
-| `warning-600` | `#d97706` | Warning hover |
-| `error-500` | `#ef4444` | Error states |
-| `error-600` | `#dc2626` | Error hover |
-| `info-500` | `#3b82f6` | Info states |
-| `info-600` | `#2563eb` | Info hover |
+| `warning-600` | `#d97706` | Warning hover  |
+| `error-500`   | `#ef4444` | Error states   |
+| `error-600`   | `#dc2626` | Error hover    |
+| `info-500`    | `#3b82f6` | Info states    |
+| `info-600`    | `#2563eb` | Info hover     |
 
 ### Typography
 
 - **Font Family**: `Inter` (headings & body) — clean, professional, excellent legibility
 - **Fallback**: `system-ui, -apple-system, sans-serif`
 
-| Scale | Size | Weight | Usage |
-|-------|------|--------|-------|
-| `text-xs` | 12px | 400 | Captions, labels |
-| `text-sm` | 14px | 400 | Secondary text |
-| `text-base` | 16px | 400 | Body text |
-| `text-lg` | 18px | 500 | Emphasis |
-| `text-xl` | 20px | 600 | Subheadings |
-| `text-2xl` | 24px | 700 | Section headings |
-| `text-3xl` | 30px | 700 | Page titles |
-| `text-4xl` | 36px | 800 | Hero headings |
+| Scale       | Size | Weight | Usage            |
+| ----------- | ---- | ------ | ---------------- |
+| `text-xs`   | 12px | 400    | Captions, labels |
+| `text-sm`   | 14px | 400    | Secondary text   |
+| `text-base` | 16px | 400    | Body text        |
+| `text-lg`   | 18px | 500    | Emphasis         |
+| `text-xl`   | 20px | 600    | Subheadings      |
+| `text-2xl`  | 24px | 700    | Section headings |
+| `text-3xl`  | 30px | 700    | Page titles      |
+| `text-4xl`  | 36px | 800    | Hero headings    |
 
 ### Spacing Scale
 
 Use Tailwind's default spacing scale (4px base). Key values:
+
 - `1` = 4px, `2` = 8px, `3` = 12px, `4` = 16px, `6` = 24px, `8` = 32px
 
 ### Border Radius
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `rounded-sm` | 4px | Small elements, tags |
-| `rounded` | 6px | Inputs, buttons |
-| `rounded-lg` | 8px | Cards, modals |
-| `rounded-xl` | 12px | Large containers |
-| `rounded-full` | 9999px | Avatars, pills |
+| Token          | Value  | Usage                |
+| -------------- | ------ | -------------------- |
+| `rounded-sm`   | 4px    | Small elements, tags |
+| `rounded`      | 6px    | Inputs, buttons      |
+| `rounded-lg`   | 8px    | Cards, modals        |
+| `rounded-xl`   | 12px   | Large containers     |
+| `rounded-full` | 9999px | Avatars, pills       |
 
 ### Shadows
 
-| Token | Usage |
-|-------|-------|
+| Token       | Usage                     |
+| ----------- | ------------------------- |
 | `shadow-sm` | Subtle elevation (inputs) |
-| `shadow` | Cards, dropdowns |
-| `shadow-md` | Modals, popovers |
-| `shadow-lg` | Floating elements |
+| `shadow`    | Cards, dropdowns          |
+| `shadow-md` | Modals, popovers          |
+| `shadow-lg` | Floating elements         |
 
 ### Usage Rules
 
 ```typescript
 // ✅ Use semantic color classes
-className="bg-primary-500 hover:bg-primary-600 text-white"
+className = "bg-primary-500 hover:bg-primary-600 text-white";
 
 // ✅ Use neutral for text hierarchy
-className="text-neutral-800"  // Primary text
-className="text-neutral-600"  // Secondary text
-className="text-neutral-400"  // Placeholder/disabled
+className = "text-neutral-800"; // Primary text
+className = "text-neutral-600"; // Secondary text
+className = "text-neutral-400"; // Placeholder/disabled
 
 // ✅ Use semantic colors for feedback
-className="text-error-500"    // Error messages
-className="bg-success-100"    // Success backgrounds
+className = "text-error-500"; // Error messages
+className = "bg-success-100"; // Success backgrounds
 
 // ❌ Don't use arbitrary colors
-className="bg-[#1a2b3c]"      // BAD - use tokens
+className = "bg-[#1a2b3c]"; // BAD - use tokens
 
 // ❌ Don't mix color systems
-className="bg-blue-500"       // BAD - use primary/semantic
+className = "bg-blue-500"; // BAD - use primary/semantic
 ```
 
 ### Dark Mode (Future)
@@ -510,14 +511,14 @@ Dark mode will invert the neutral scale and adjust primary colors for contrast. 
 ```css
 /* Light mode (default) */
 :root {
-  --color-bg-primary: theme('colors.neutral.50');
-  --color-text-primary: theme('colors.neutral.800');
+  --color-bg-primary: theme("colors.neutral.50");
+  --color-text-primary: theme("colors.neutral.800");
 }
 
 /* Dark mode */
 .dark {
-  --color-bg-primary: theme('colors.neutral-950');
-  --color-text-primary: theme('colors.neutral.100');
+  --color-bg-primary: theme("colors.neutral-950");
+  --color-text-primary: theme("colors.neutral.100");
 }
 ```
 
