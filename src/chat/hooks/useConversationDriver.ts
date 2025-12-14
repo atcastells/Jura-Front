@@ -9,7 +9,17 @@ import {
   useSendChatMessageMutation,
 } from '@/agents';
 
+// Agent configuration constants
 const PROFILE_BUILDER_AGENT_NAME = 'Profile Builder';
+const PROFILE_BUILDER_AGENT_CONFIG = {
+  name: PROFILE_BUILDER_AGENT_NAME,
+  type: 'PRIVATE' as const,
+  tone: 'PROFESSIONAL' as const,
+  instructions:
+    'You are a helpful AI career agent assisting users in building recruiter-ready profiles. Guide them through adding their professional experience, skills, and achievements.',
+  enableThreads: true,
+};
+
 const THREAD_STORAGE_KEY = (agentId: string) => `jura-thread-${agentId}`;
 
 /**
@@ -50,14 +60,7 @@ const useEnsureAgent = (agents: Agent[] | undefined, isLoadingAgents: boolean) =
 
     // Trigger creation
     createAgentMutation.mutate(
-      {
-        name: PROFILE_BUILDER_AGENT_NAME,
-        type: 'PRIVATE',
-        tone: 'PROFESSIONAL',
-        instructions:
-          'You are a helpful AI career agent assisting users in building recruiter-ready profiles. Guide them through adding their professional experience, skills, and achievements.',
-        enableThreads: true,
-      },
+      PROFILE_BUILDER_AGENT_CONFIG,
       {
         onSuccess: (newAgent) => {
           setCreatedAgentId(newAgent.id);
