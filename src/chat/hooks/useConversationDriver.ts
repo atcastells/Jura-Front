@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ConversationTurn, ConversationState } from '../types';
 import type { ChatMessage, Agent } from '@/agents';
 import {
@@ -39,40 +39,34 @@ const mapChatMessageToTurn = (message: ChatMessage): ConversationTurn => ({
 const useEnsureAgent = (agents: Agent[] | undefined, isLoadingAgents: boolean) => {
   const [createdAgentId, setCreatedAgentId] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isCreating, setIsCreating] = useState(false);
   const createAgentMutation = useCreateAgentMutation();
 
-  // Find or create agent
-  const agentId = useMemo(() => {
+  const existingAgent = useMemo(() => {
     if (isLoadingAgents || !agents) return null;
 
-    const existingAgent = agents.find(
-      (a) => a.name === PROFILE_BUILDER_AGENT_NAME && a.type === 'PRIVATE'
+    return (
+      agents.find((a) => a.name === PROFILE_BUILDER_AGENT_NAME && a.type === 'PRIVATE') || null
     );
+  }, [agents, isLoadingAgents]);
 
-    if (existingAgent) {
-      return existingAgent.id;
-    }
+  useEffect(() => {
+    if (isLoadingAgents || existingAgent || createdAgentId || isCreating) return;
 
-    // Return created agent ID if we already created one
-    if (createdAgentId) {
-      return createdAgentId;
-    }
+    setIsCreating(true);
+    createAgentMutation.mutate(PROFILE_BUILDER_AGENT_CONFIG, {
+      onSuccess: (newAgent) => {
+        setCreatedAgentId(newAgent.id);
+        setIsCreating(false);
+      },
+      onError: (err) => {
+        setError(`Failed to initialize agent: ${err.message}`);
+        setIsCreating(false);
+      },
+    });
+  }, [isLoadingAgents, existingAgent, createdAgentId, isCreating, createAgentMutation]);
 
-    // Trigger creation
-    createAgentMutation.mutate(
-      PROFILE_BUILDER_AGENT_CONFIG,
-      {
-        onSuccess: (newAgent) => {
-          setCreatedAgentId(newAgent.id);
-        },
-        onError: (err) => {
-          setError(`Failed to initialize agent: ${err.message}`);
-        },
-      }
-    );
-
-    return null;
-  }, [agents, isLoadingAgents, createdAgentId, createAgentMutation]);
+  const agentId = existingAgent?.id || createdAgentId;
 
   return { agentId, error };
 };
@@ -83,39 +77,35 @@ const useEnsureAgent = (agents: Agent[] | undefined, isLoadingAgents: boolean) =
 const useEnsureThread = (agentId: string | null) => {
   const [createdThreadId, setCreatedThreadId] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isCreating, setIsCreating] = useState(false);
   const createThreadMutation = useCreateThreadMutation();
 
-  // Find or create thread
-  const threadId = useMemo(() => {
+  const storedThreadId = useMemo(() => {
     if (!agentId) return null;
+    return localStorage.getItem(THREAD_STORAGE_KEY(agentId));
+  }, [agentId]);
 
-    // Check localStorage first
-    const storedThreadId = localStorage.getItem(THREAD_STORAGE_KEY(agentId));
-    if (storedThreadId) {
-      return storedThreadId;
-    }
+  useEffect(() => {
+    if (!agentId || storedThreadId || createdThreadId || isCreating) return;
 
-    // Return created thread ID if we already created one
-    if (createdThreadId) {
-      return createdThreadId;
-    }
-
-    // Trigger creation
+    setIsCreating(true);
     createThreadMutation.mutate(
       { agentId },
       {
         onSuccess: (newThread) => {
           setCreatedThreadId(newThread.id);
           localStorage.setItem(THREAD_STORAGE_KEY(agentId), newThread.id);
+          setIsCreating(false);
         },
         onError: (err) => {
           setError(`Failed to create thread: ${err.message}`);
+          setIsCreating(false);
         },
       }
     );
+  }, [agentId, storedThreadId, createdThreadId, isCreating, createThreadMutation]);
 
-    return null;
-  }, [agentId, createdThreadId, createThreadMutation]);
+  const threadId = storedThreadId || createdThreadId;
 
   return { threadId, error };
 };
