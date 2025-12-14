@@ -56,21 +56,5 @@ export interface ConfirmationData {
 export interface ConversationState {
   turns: ConversationTurn[];
   isLoading: boolean;
-  currentStep: ConversationStep;
-}
-
-// Conversation steps for the profile builder flow
-export type ConversationStep =
-  | 'welcome'
-  | 'cv-upload-or-manual'
-  | 'basic-info'
-  | 'role-entry'
-  | 'role-details'
-  | 'review'
-  | 'complete';
-
-// User input action
-export interface UserInputAction {
-  type: 'message' | 'file-upload' | 'field-update' | 'confirmation';
-  payload: unknown;
+  error?: string;
 }

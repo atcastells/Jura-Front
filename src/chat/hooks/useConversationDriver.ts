@@ -1,251 +1,190 @@
-import { useState, useCallback } from 'react';
-import type {
-  ConversationTurn,
-  ConversationState,
-  ConversationStep,
-  UserInputAction,
-} from '../types';
-import { useMyProfileQuery } from '@/profile';
+import { useState, useCallback, useMemo } from 'react';
+import type { ConversationTurn, ConversationState } from '../types';
+import type { ChatMessage, Agent } from '@/agents';
+import {
+  useAgentsQuery,
+  useCreateAgentMutation,
+  useCreateThreadMutation,
+  useThreadHistoryQuery,
+  useSendChatMessageMutation,
+} from '@/agents';
+
+// Agent configuration constants
+const PROFILE_BUILDER_AGENT_NAME = 'Profile Builder';
+const PROFILE_BUILDER_AGENT_CONFIG = {
+  name: PROFILE_BUILDER_AGENT_NAME,
+  type: 'PRIVATE' as const,
+  tone: 'PROFESSIONAL' as const,
+  instructions:
+    'You are a helpful AI career agent assisting users in building recruiter-ready profiles. Guide them through adding their professional experience, skills, and achievements.',
+  enableThreads: true,
+};
+
+const THREAD_STORAGE_KEY = (agentId: string) => `jura-thread-${agentId}`;
 
 /**
- * Mock backend-first conversation driver
- * This simulates a backend-driven conversation flow for profile building
- * In production, this would be replaced by actual API calls to /agents/:id/chat
+ * Maps backend ChatMessage to frontend ConversationTurn
+ */
+const mapChatMessageToTurn = (message: ChatMessage): ConversationTurn => ({
+  id: message.id,
+  role: message.role,
+  content: message.content,
+  timestamp: new Date(message.createdAt),
+  blocks: undefined, // Future: parse blocks from message.metadata
+});
+
+/**
+ * Hook to ensure Profile Builder agent exists
+ */
+const useEnsureAgent = (agents: Agent[] | undefined, isLoadingAgents: boolean) => {
+  const [createdAgentId, setCreatedAgentId] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const createAgentMutation = useCreateAgentMutation();
+
+  // Find or create agent
+  const agentId = useMemo(() => {
+    if (isLoadingAgents || !agents) return null;
+
+    const existingAgent = agents.find(
+      (a) => a.name === PROFILE_BUILDER_AGENT_NAME && a.type === 'PRIVATE'
+    );
+
+    if (existingAgent) {
+      return existingAgent.id;
+    }
+
+    // Return created agent ID if we already created one
+    if (createdAgentId) {
+      return createdAgentId;
+    }
+
+    // Trigger creation
+    createAgentMutation.mutate(
+      PROFILE_BUILDER_AGENT_CONFIG,
+      {
+        onSuccess: (newAgent) => {
+          setCreatedAgentId(newAgent.id);
+        },
+        onError: (err) => {
+          setError(`Failed to initialize agent: ${err.message}`);
+        },
+      }
+    );
+
+    return null;
+  }, [agents, isLoadingAgents, createdAgentId, createAgentMutation]);
+
+  return { agentId, error };
+};
+
+/**
+ * Hook to ensure thread exists for agent
+ */
+const useEnsureThread = (agentId: string | null) => {
+  const [createdThreadId, setCreatedThreadId] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const createThreadMutation = useCreateThreadMutation();
+
+  // Find or create thread
+  const threadId = useMemo(() => {
+    if (!agentId) return null;
+
+    // Check localStorage first
+    const storedThreadId = localStorage.getItem(THREAD_STORAGE_KEY(agentId));
+    if (storedThreadId) {
+      return storedThreadId;
+    }
+
+    // Return created thread ID if we already created one
+    if (createdThreadId) {
+      return createdThreadId;
+    }
+
+    // Trigger creation
+    createThreadMutation.mutate(
+      { agentId },
+      {
+        onSuccess: (newThread) => {
+          setCreatedThreadId(newThread.id);
+          localStorage.setItem(THREAD_STORAGE_KEY(agentId), newThread.id);
+        },
+        onError: (err) => {
+          setError(`Failed to create thread: ${err.message}`);
+        },
+      }
+    );
+
+    return null;
+  }, [agentId, createdThreadId, createThreadMutation]);
+
+  return { threadId, error };
+};
+
+/**
+ * Backend-driven conversation driver using agent + thread endpoints
  */
 export const useConversationDriver = () => {
-  const { data: profile } = useMyProfileQuery();
-  
-  const [state, setState] = useState<ConversationState>({
-    turns: [
-      {
-        id: '1',
-        role: 'assistant',
-        content: 'Welcome to Jura! 👋',
-        blocks: [
-          {
-            id: 'welcome-1',
-            type: 'text',
-            data: {
-              content:
-                "I'm your AI career agent. I'll help you build a recruiter-ready profile that showcases your experience and achievements. Let's get started!",
-            },
-          },
-          {
-            id: 'welcome-2',
-            type: 'cv-upload-prompt',
-            data: {
-              acceptedFormats: ['.pdf', '.doc', '.docx'],
-            },
-          },
-        ],
-        timestamp: new Date(),
-      },
-    ],
-    isLoading: false,
-    currentStep: 'welcome',
-  });
+  const [sendError, setSendError] = useState<string | undefined>(undefined);
 
-  const getNextStep = useCallback(
-    (currentStep: ConversationStep): ConversationStep => {
-      if (currentStep === 'welcome') return 'cv-upload-or-manual';
-      if (currentStep === 'cv-upload-or-manual') return 'basic-info';
-      if (currentStep === 'basic-info') {
-        // Check if we have basic info
-        if (!profile?.basics.name || !profile?.basics.headline) {
-          return 'basic-info';
-        }
-        return 'role-entry';
-      }
-      if (currentStep === 'role-entry') return 'role-details';
-      if (currentStep === 'role-details') {
-        // Check if we need more roles
-        if (!profile?.roles || profile.roles.length === 0) {
-          return 'role-entry';
-        }
-        return 'review';
-      }
-      if (currentStep === 'review') return 'complete';
-      return 'complete';
-    },
-    [profile]
+  // Queries and mutations
+  const { data: agents, isLoading: isLoadingAgents } = useAgentsQuery();
+  const sendChatMutation = useSendChatMessageMutation();
+
+  // Ensure agent and thread exist
+  const { agentId, error: agentError } = useEnsureAgent(agents, isLoadingAgents);
+  const { threadId, error: threadError } = useEnsureThread(agentId);
+
+  // Load thread history when agent and thread are ready
+  const { data: threadHistory, isLoading: isLoadingHistory } = useThreadHistoryQuery(
+    agentId || '',
+    threadId || '',
+    !!(agentId && threadId)
   );
 
-  const generateAssistantResponse = useCallback(
-    (step: ConversationStep, userMessage?: string): ConversationTurn => {
-      const turnId = `turn-${Date.now()}`;
+  // Compute turns from thread history
+  const turns = threadHistory ? threadHistory.map(mapChatMessageToTurn) : [];
 
-      switch (step) {
-        case 'cv-upload-or-manual':
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: 'Great! How would you like to proceed?',
-            blocks: [
-              {
-                id: `${turnId}-text`,
-                type: 'text',
-                data: {
-                  content:
-                    'You can either upload your CV and I\'ll extract the information, or we can enter it manually together. What would you prefer?',
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
+  // Compute loading state
+  const isLoading = isLoadingAgents || isLoadingHistory || !agentId || !threadId;
 
-        case 'basic-info':
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: "Let's start with your basic information",
-            blocks: [
-              {
-                id: `${turnId}-basics`,
-                type: 'profile-basics-prompt',
-                data: {
-                  fields: ['name', 'headline', 'email', 'location'],
-                  existingData: profile?.basics || {},
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
+  // Combine errors
+  const error = agentError || threadError || sendError;
 
-        case 'role-entry':
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: "Now, let's add your professional experience",
-            blocks: [
-              {
-                id: `${turnId}-text`,
-                type: 'text',
-                data: {
-                  content:
-                    'Tell me about your most recent or current role. What was your job title and company?',
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
-
-        case 'role-details':
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: 'Tell me more about this role',
-            blocks: [
-              {
-                id: `${turnId}-role`,
-                type: 'role-prompt',
-                data: {
-                  roleIndex: profile?.roles.length || 0,
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
-
-        case 'review':
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: 'Great progress!',
-            blocks: [
-              {
-                id: `${turnId}-text`,
-                type: 'text',
-                data: {
-                  content: `Your profile is ${Math.round((profile?.completenessScore || 0) * 100)}% complete. You can review it on the right panel. Would you like to add another role or refine what we have?`,
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
-
-        case 'complete':
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: 'Your profile is ready!',
-            blocks: [
-              {
-                id: `${turnId}-text`,
-                type: 'text',
-                data: {
-                  content:
-                    '🎉 Your profile looks great! You can continue to refine it or start sharing it with recruiters.',
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
-
-        default:
-          return {
-            id: turnId,
-            role: 'assistant',
-            content: userMessage || 'I understand.',
-            blocks: [
-              {
-                id: `${turnId}-text`,
-                type: 'text',
-                data: {
-                  content: 'How else can I help you with your profile?',
-                },
-              },
-            ],
-            timestamp: new Date(),
-          };
-      }
-    },
-    [profile]
-  );
-
-  const handleUserInput = useCallback(
-    (action: UserInputAction) => {
-      setState((prev) => {
-        const userTurn: ConversationTurn = {
-          id: `user-${Date.now()}`,
-          role: 'user',
-          content:
-            action.type === 'message'
-              ? (action.payload as string)
-              : `[${action.type}]`,
-          timestamp: new Date(),
-        };
-
-        const nextStep = getNextStep(prev.currentStep);
-        const assistantTurn = generateAssistantResponse(
-          nextStep,
-          userTurn.content
-        );
-
-        return {
-          ...prev,
-          turns: [...prev.turns, userTurn, assistantTurn],
-          currentStep: nextStep,
-        };
-      });
-    },
-    [getNextStep, generateAssistantResponse]
-  );
+  // Build conversation state
+  const conversation: ConversationState = {
+    turns,
+    isLoading,
+    error,
+  };
 
   const sendMessage = useCallback(
     (message: string) => {
-      if (!message.trim()) return;
+      if (!message.trim() || !agentId || !threadId) return;
 
-      handleUserInput({
-        type: 'message',
-        payload: message,
-      });
+      // Clear previous send errors
+      setSendError(undefined);
+
+      // Send to backend
+      sendChatMutation.mutate(
+        {
+          agentId,
+          payload: {
+            message,
+            threadId,
+          },
+        },
+        {
+          onError: (err) => {
+            setSendError(`Failed to send message: ${err.message}`);
+          },
+        }
+      );
     },
-    [handleUserInput]
+    [agentId, threadId, sendChatMutation]
   );
 
   return {
-    conversation: state,
+    conversation,
     sendMessage,
-    handleUserInput,
   };
 };

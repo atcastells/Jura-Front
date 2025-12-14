@@ -10,7 +10,9 @@ export const ConversationView = () => {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (conversation.turns.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [conversation.turns]);
 
   const renderTurn = (turn: ConversationTurn) => {
@@ -80,27 +82,49 @@ export const ConversationView = () => {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-700">
-            Step: {conversation.currentStep}
-          </span>
-        </div>
+
       </div>
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
-        {conversation.turns.map((turn) => renderTurn(turn))}
-        {conversation.isLoading && (
-          <div className="flex justify-start mb-4">
-            <div className="flex items-center gap-2 rounded-lg bg-neutral-100 px-4 py-3">
-              <div className="flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '0ms' }}></span>
-                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '150ms' }}></span>
-                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '300ms' }}></span>
+        {conversation.error && (
+          <div className="mb-4 rounded-lg bg-error-50 border border-error-200 px-4 py-3">
+            <p className="text-sm text-error-700">{conversation.error}</p>
+          </div>
+        )}
+        {conversation.turns.length === 0 && !conversation.isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center max-w-md">
+              <div className="mb-4 flex justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-600 text-2xl font-bold">
+                  J
+                </div>
               </div>
-              <span className="text-xs text-neutral-600">Jura is typing...</span>
+              <h3 className="text-lg font-semibold text-neutral-800 mb-2">
+                Welcome to Jura!
+              </h3>
+              <p className="text-sm text-neutral-600">
+                I'm your AI career agent. Start a conversation to build your
+                recruiter-ready profile.
+              </p>
             </div>
           </div>
+        ) : (
+          <>
+            {conversation.turns.map((turn) => renderTurn(turn))}
+            {conversation.isLoading && (
+              <div className="flex justify-start mb-4">
+                <div className="flex items-center gap-2 rounded-lg bg-neutral-100 px-4 py-3">
+                  <div className="flex gap-1">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '0ms' }}></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '150ms' }}></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                  <span className="text-xs text-neutral-600">Jura is typing...</span>
+                </div>
+              </div>
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
