@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authKeys } from '@/shared';
 import { signIn, signUp } from './authApi';
-import type { SignInCredentials, SignUpCredentials, AuthResponse, User } from '../types';
+import type { SignInCredentials, SignUpCredentials, AuthResponse } from '../types';
 
 const TOKEN_KEY = 'auth_token';
 

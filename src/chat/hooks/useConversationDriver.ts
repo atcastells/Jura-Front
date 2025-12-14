@@ -3,7 +3,6 @@ import type {
   ConversationTurn,
   ConversationState,
   ConversationStep,
-  TurnBlock,
   UserInputAction,
 } from '../types';
 import { useMyProfileQuery } from '@/profile';
