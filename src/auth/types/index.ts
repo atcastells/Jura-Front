@@ -1,5 +1,3 @@
-import type { Timestamps } from '@/shared';
-
 // User entity
 export interface User {
   id: string;

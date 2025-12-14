@@ -108,6 +108,24 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
+  async patch<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
+    const token = getAuthToken();
+    const url = buildUrl(endpoint, config?.params);
+
+    const response = await fetch(url, {
+      ...config,
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...config?.headers,
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    return handleResponse<T>(response);
+  },
+
   async delete<T>(endpoint: string, config?: RequestConfig): Promise<T> {
     const token = getAuthToken();
     const url = buildUrl(endpoint, config?.params);
