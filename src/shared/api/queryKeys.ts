@@ -25,3 +25,10 @@ export const chatKeys = {
   all: ['chat'] as const,
   messages: (threadId: string) => [...chatKeys.all, 'messages', threadId] as const,
 };
+
+export const profileKeys = {
+  all: ['profile'] as const,
+  me: () => [...profileKeys.all, 'me'] as const,
+  roles: () => [...profileKeys.all, 'roles'] as const,
+  role: (roleId: string) => [...profileKeys.all, 'roles', roleId] as const,
+};
