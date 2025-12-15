@@ -1,4 +1,5 @@
-import type { TurnBlock } from '../types';
+import type { TurnBlock } from "../types";
+import { MarkdownViewer } from "@/shared";
 
 interface TurnBlockRendererProps {
   block: TurnBlock;
@@ -6,18 +7,16 @@ interface TurnBlockRendererProps {
 
 export const TurnBlockRenderer = ({ block }: TurnBlockRendererProps) => {
   switch (block.type) {
-    case 'text': {
+    case "text": {
       const textData = block.data as { content: string };
       return (
         <div className="rounded-lg bg-neutral-50 p-4">
-          <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
-            {textData.content}
-          </p>
+          <MarkdownViewer content={textData.content} />
         </div>
       );
     }
 
-    case 'cv-upload-prompt': {
+    case "cv-upload-prompt": {
       const uploadData = block.data as { acceptedFormats: string[] };
       return (
         <div className="rounded-lg border-2 border-dashed border-neutral-300 bg-white p-6 text-center">
@@ -28,7 +27,7 @@ export const TurnBlockRenderer = ({ block }: TurnBlockRendererProps) => {
             Upload Your CV
           </h4>
           <p className="mb-4 text-xs text-neutral-600">
-            Accepted formats: {uploadData.acceptedFormats.join(', ')}
+            Accepted formats: {uploadData.acceptedFormats.join(", ")}
           </p>
           <button
             className="rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:bg-neutral-300 disabled:cursor-not-allowed"
@@ -44,7 +43,7 @@ export const TurnBlockRenderer = ({ block }: TurnBlockRendererProps) => {
       );
     }
 
-    case 'profile-basics-prompt': {
+    case "profile-basics-prompt": {
       const basicsData = block.data as {
         fields: string[];
         existingData?: Record<string, string>;
@@ -59,22 +58,31 @@ export const TurnBlockRenderer = ({ block }: TurnBlockRendererProps) => {
               const value = basicsData.existingData?.[field];
               return (
                 <div key={field} className="flex items-center justify-between">
-                  <span className="capitalize">{field.replace(/([A-Z])/g, ' $1')}:</span>
-                  <span className={value ? 'text-primary-600 font-medium' : 'text-neutral-400'}>
-                    {value || 'Not set'}
+                  <span className="capitalize">
+                    {field.replace(/([A-Z])/g, " $1")}:
+                  </span>
+                  <span
+                    className={
+                      value
+                        ? "text-primary-600 font-medium"
+                        : "text-neutral-400"
+                    }
+                  >
+                    {value || "Not set"}
                   </span>
                 </div>
               );
             })}
           </div>
           <p className="mt-4 text-xs text-neutral-500 italic">
-            You can update these fields by typing your information in the message box below
+            You can update these fields by typing your information in the
+            message box below
           </p>
         </div>
       );
     }
 
-    case 'role-prompt': {
+    case "role-prompt": {
       const roleData = block.data as {
         roleIndex?: number;
         existingRole?: Record<string, unknown>;
@@ -91,7 +99,7 @@ export const TurnBlockRenderer = ({ block }: TurnBlockRendererProps) => {
       );
     }
 
-    case 'confirmation': {
+    case "confirmation": {
       const confirmData = block.data as {
         action: string;
         details: Record<string, unknown>;
@@ -106,8 +114,8 @@ export const TurnBlockRenderer = ({ block }: TurnBlockRendererProps) => {
             {Object.entries(confirmData.details).map(([key, value]) => (
               <div key={key} className="mb-1">
                 <span className="font-medium capitalize">
-                  {key.replace(/([A-Z])/g, ' $1')}:
-                </span>{' '}
+                  {key.replace(/([A-Z])/g, " $1")}:
+                </span>{" "}
                 {String(value)}
               </div>
             ))}

@@ -14,7 +14,7 @@ const AGENT_ENDPOINTS = {
   detail: (id: string) => `/api/v1/agents/${id}`,
   createThread: (id: string) => `/api/v1/agents/${id}/threads`,
   threadHistory: (id: string, threadId: string) =>
-    `/api/v1/agents/${id}/threads/${threadId}/messages`,
+    `/api/v1/agents/${id}/threads/${threadId}`,
   chat: (id: string) => `/api/v1/agents/${id}/chat`,
 } as const;
 

@@ -115,6 +115,8 @@ const useEnsureThread = (agentId: string | null) => {
  */
 export const useConversationDriver = () => {
   const [sendError, setSendError] = useState<string | undefined>(undefined);
+  const [optimisticTurns, setOptimisticTurns] = useState<ConversationTurn[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
   // Queries and mutations
   const { data: agents, isLoading: isLoadingAgents } = useAgentsQuery();
@@ -125,17 +127,26 @@ export const useConversationDriver = () => {
   const { threadId, error: threadError } = useEnsureThread(agentId);
 
   // Load thread history when agent and thread are ready
-  const { data: threadHistory, isLoading: isLoadingHistory } = useThreadHistoryQuery(
+  const { data: threadHistory, isLoading: isLoadingHistory, refetch: refetchThread } = useThreadHistoryQuery(
     agentId || '',
     threadId || '',
     !!(agentId && threadId)
   );
 
   // Compute turns from thread history
-  const turns = threadHistory ? threadHistory.map(mapChatMessageToTurn) : [];
+  const turnsFromHistory = threadHistory ? threadHistory.map(mapChatMessageToTurn) : [];
+  // Merge optimistic turns (user message and placeholder) with fetched history
+  const turns = useMemo(() => {
+    if (optimisticTurns.length === 0) return turnsFromHistory;
+    // Avoid duplicates: filter out any history turn that matches optimistic ids
+    const optimisticIds = new Set(optimisticTurns.map((t) => t.id));
+    const merged = [...turnsFromHistory.filter((t) => !optimisticIds.has(t.id)), ...optimisticTurns];
+    // Sort by timestamp to keep order
+    return merged.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }, [turnsFromHistory, optimisticTurns]);
 
   // Compute loading state
-  const isLoading = isLoadingAgents || isLoadingHistory || !agentId || !threadId;
+  const isLoading = isLoadingAgents || isLoadingHistory || !agentId || !threadId || isSending;
 
   // Combine errors
   const error = agentError || threadError || sendError;
@@ -153,6 +164,27 @@ export const useConversationDriver = () => {
 
       // Clear previous send errors
       setSendError(undefined);
+      setIsSending(true);
+
+      // Add optimistic user turn immediately
+      const optimisticUserTurn: ConversationTurn = {
+        id: `optimistic-user-${Date.now()}`,
+        role: 'user',
+        content: message,
+        timestamp: new Date(),
+        blocks: undefined,
+      };
+
+      // Add a lightweight typing/progress placeholder for agent
+      const optimisticAgentTyping: ConversationTurn = {
+        id: `optimistic-agent-${Date.now()}`,
+        role: 'assistant',
+        content: '...',
+        timestamp: new Date(new Date().getTime() + 1), // slightly after user
+        blocks: undefined,
+      };
+
+      setOptimisticTurns((prev) => [...prev, optimisticUserTurn, optimisticAgentTyping]);
 
       // Send to backend
       sendChatMutation.mutate(
@@ -166,11 +198,24 @@ export const useConversationDriver = () => {
         {
           onError: (err) => {
             setSendError(`Failed to send message: ${err.message}`);
+            // Remove optimistic typing indicator
+            setOptimisticTurns((prev) => prev.filter((t) => !t.id.startsWith('optimistic-')));
+            setIsSending(false);
+          },
+          onSuccess: async () => {
+            // Explicitly refetch thread history endpoint to refresh messages
+            try {
+              await refetchThread();
+            } finally {
+              // After server response arrives, hide optimistic turns
+              setOptimisticTurns([]);
+              setIsSending(false);
+            }
           },
         }
       );
     },
-    [agentId, threadId, sendChatMutation]
+    [agentId, threadId, sendChatMutation, refetchThread]
   );
 
   return {

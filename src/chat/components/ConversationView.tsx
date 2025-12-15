@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
-import type { ConversationTurn } from '../types';
-import { TurnBlockRenderer } from './TurnBlockRenderer';
-import { MessageComposer } from './MessageComposer';
-import { useConversationDriver } from '../hooks';
+import { useEffect, useRef } from "react";
+import type { ConversationTurn } from "../types";
+import { TurnBlockRenderer } from "./TurnBlockRenderer";
+import { MessageComposer } from "./MessageComposer";
+import { useConversationDriver } from "../hooks";
+import { MarkdownViewer } from "@/shared";
 
 export const ConversationView = () => {
   const { conversation, sendMessage } = useConversationDriver();
@@ -11,33 +12,37 @@ export const ConversationView = () => {
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (conversation.turns.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [conversation.turns]);
 
   const renderTurn = (turn: ConversationTurn) => {
-    const isUser = turn.role === 'user';
+    const isUser = turn.role === "user";
 
     return (
       <div
         key={turn.id}
-        className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
+        className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}
       >
-        <div className={`max-w-[85%] ${isUser ? 'ml-auto' : 'mr-auto'}`}>
+        <div className={`max-w-[85%] ${isUser ? "ml-auto" : "mr-auto"}`}>
           {/* Turn header */}
-          <div className={`mb-1 flex items-center gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+          <div
+            className={`mb-1 flex items-center gap-2 ${
+              isUser ? "justify-end" : "justify-start"
+            }`}
+          >
             {!isUser && (
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500 text-white text-xs font-bold">
                 J
               </div>
             )}
             <span className="text-xs text-neutral-500">
-              {isUser ? 'You' : 'Jura'}
+              {isUser ? "You" : "Jura"}
             </span>
             <span className="text-xs text-neutral-400">
               {turn.timestamp.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
+                hour: "2-digit",
+                minute: "2-digit",
               })}
             </span>
           </div>
@@ -54,8 +59,8 @@ export const ConversationView = () => {
                   <TurnBlockRenderer key={block.id} block={block} />
                 ))
               ) : (
-                <div className="rounded-lg bg-neutral-100 px-4 py-3 text-sm text-neutral-700">
-                  {turn.content}
+                <div className="rounded-lg bg-neutral-100 px-4 py-3">
+                  <MarkdownViewer content={turn.content} />
                 </div>
               )}
             </div>
@@ -82,7 +87,6 @@ export const ConversationView = () => {
             </p>
           </div>
         </div>
-
       </div>
 
       {/* Messages area */}
@@ -116,11 +120,22 @@ export const ConversationView = () => {
               <div className="flex justify-start mb-4">
                 <div className="flex items-center gap-2 rounded-lg bg-neutral-100 px-4 py-3">
                   <div className="flex gap-1">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '0ms' }}></span>
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '150ms' }}></span>
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500" style={{ animationDelay: '300ms' }}></span>
+                    <span
+                      className="h-2 w-2 animate-bounce rounded-full bg-primary-500"
+                      style={{ animationDelay: "0ms" }}
+                    ></span>
+                    <span
+                      className="h-2 w-2 animate-bounce rounded-full bg-primary-500"
+                      style={{ animationDelay: "150ms" }}
+                    ></span>
+                    <span
+                      className="h-2 w-2 animate-bounce rounded-full bg-primary-500"
+                      style={{ animationDelay: "300ms" }}
+                    ></span>
                   </div>
-                  <span className="text-xs text-neutral-600">Jura is typing...</span>
+                  <span className="text-xs text-neutral-600">
+                    Jura is typing...
+                  </span>
                 </div>
               </div>
             )}
